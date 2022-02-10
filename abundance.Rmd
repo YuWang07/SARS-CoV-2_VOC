@@ -1,0 +1,69 @@
+---
+title: "abundance"
+output: html_document
+---
+
+#Access libraries
+
+```{r}
+library(ggplot2)
+library(tibble)
+library(dplyr)
+```
+
+
+```{r}
+setwd('../COVID_final/variant/freebayes/F0.05/')
+path <- "../COVID_final/variant/freebayes/F0.05/05_result/"
+fileNames<-dir(path)
+list.files(path)
+
+```
+
+
+```{r}
+filePath <- sapply(fileNames, function(x){ 
+     paste(path,x,sep='/')})  
+data <- lapply(filePath, function(x){
+  read.table(x,sep = " ")})
+outPath <- "../COVID_final/variant/freebayes/F0.05/out" 
+out_fileName <- sapply(names(data),function(x){
+paste(x, ".csv", sep='')})
+out_filePath <- sapply(out_fileName, function(x){
+paste(outPath ,x,sep='/')})
+```
+
+```{r}
+dup<-c("A23063T",	"A23403G",	"C14408T",	"C21614T",	"C241T",	"C3037T",	"G23012A",	"G28881A",	"G28882A",	"G28883C")
+for(i in 1:length(data)){
+  colnames(data[[i]]) <- c("ID", "SNP", "Mut", "count") 
+  data[[i]]<-data[[i]] %>% filter_at(vars(Mut),all_vars((.!=0)))
+  
+}
+```
+
+
+```{r}
+for(i in 1:length(data)){
+  temp<-data[[i]]
+  temp<-temp %>% 
+    group_by(ID) %>% 
+    summarise_at(vars(count),list(avg=mean)) %>% mutate(relab = avg/sum(avg))
+write.csv(temp, file=out_filePath[i] ) 
+}
+```
+
+```{r}
+count<-read.csv("../VOC_abundance_summary.csv",sep = ",",header = T)
+#count$group <- c(rep('D1', 29), rep('D2', 29), rep('D3', 29),rep('D4',32),rep('D5',34),rep('WA',7))
+ggplot(count, aes(sample, relab, fill = ID)) +
+  geom_col(position = 'stack', width = 0.6) +
+  facet_wrap(~group, scales = 'free_x', ncol = 5) +
+ # geom_text(aes(label=round(relab, digits = 1)), hjust=0.2,colour="black") +
+  scale_fill_manual(values =  rev(c('cyan4', 'brown2', 'green4', 'gold1'))) +
+  theme_bw()+
+  theme(panel.grid.major=element_line(colour=NA))+
+  theme(axis.text.x = element_text(angle = 90, hjust = 1, vjust = 1))
+
+#ggsave("../plot/F0.05_update_relab.svg",width = 40, height = 20, units = "cm")
+```
