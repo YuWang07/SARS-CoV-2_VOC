@@ -13,8 +13,8 @@ library(dplyr)
 
 
 ```{r}
-setwd('../COVID_final/variant/freebayes/F0.05/')
-path <- "../COVID_final/variant/freebayes/F0.05/05_result/"
+setwd('../COVID_final/variant/freebayes/')
+path <- "../COVID_final/variant/freebayes/05_result/"
 fileNames<-dir(path)
 list.files(path)
 
@@ -26,7 +26,7 @@ filePath <- sapply(fileNames, function(x){
      paste(path,x,sep='/')})  
 data <- lapply(filePath, function(x){
   read.table(x,sep = " ")})
-outPath <- "../COVID_final/variant/freebayes/F0.05/out" 
+outPath <- "../COVID/variant/freebayes/out" 
 out_fileName <- sapply(names(data),function(x){
 paste(x, ".csv", sep='')})
 out_filePath <- sapply(out_fileName, function(x){
@@ -65,5 +65,5 @@ ggplot(count, aes(sample, relab, fill = ID)) +
   theme(panel.grid.major=element_line(colour=NA))+
   theme(axis.text.x = element_text(angle = 90, hjust = 1, vjust = 1))
 
-#ggsave("../plot/F0.05_update_relab.svg",width = 40, height = 20, units = "cm")
+#ggsave("../plot/update_relab.svg",width = 40, height = 20, units = "cm")
 ```
